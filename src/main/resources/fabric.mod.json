@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "vulkanshaders",
+  "version": "${version}",
+  "name": "VulkanShaders",
+  "description": "Dynamic shader pack loader for VulkanMod - enabling GLSL 450/SPIR-V shader packs for Vulkan-based Minecraft rendering",
+  "authors": ["Legendyboi"],
+  "contact": {
+    "homepage": "https://github.com/Legendyboi/VulkanShaders",
+    "sources": "https://github.com/Legendyboi/VulkanShaders",
+    "issues": "https://github.com/Legendyboi/VulkanShaders/issues"
+  },
+  "license": "LGPL-3.0",
+  "icon": "assets/vulkanshaders/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "fabric-datagen": [
+      "net.vulkanshaders.client.VulkanShadersInitDataGenerator"
+    ],
+    "client": [
+      "net.vulkanshaders.client.VulkanShadersInitClient"
+    ],
+    "main": [
+      "net.vulkanshaders.VulkanShadersInit"
+    ]
+  },
+  "mixins": [
+    "vulkanshaders.mixins.json",
+    {
+      "config": "vulkanshaders.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=0.18.0",
+    "fabric-api": "*",
+    "minecraft": "~1.21.10",
+    "vulkanmod": "*"
+  },
+  "suggests": {
+    "modmenu": "*"
+  }
+}
