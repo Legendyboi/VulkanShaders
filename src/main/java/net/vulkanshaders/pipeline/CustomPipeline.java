@@ -34,34 +34,44 @@ public class CustomPipeline {
     }
 
     /**
-     * Initialize the Vulkan pipeline (call after Vulkan context is ready)
-     * WARNING: This can crash if called too early!
+     * Initialize the Vulkan pipeline by copying from a VulkanMod pipeline
+     * This must be called AFTER VulkanMod has created its pipelines
      */
-    public void initialize() {
+    public void initializeFrom(GraphicsPipeline templatePipeline) {
         if (initialized) {
             LOGGER.warn("Pipeline {} already initialized", name);
             return;
         }
 
         try {
-            LOGGER.info("Initializing pipeline: {} from pack {}", name, sourcePack.getName());
+            LOGGER.info("Initializing custom pipeline: {} from pack {}", name, sourcePack.getName());
 
             // Get vertex format from config or use default
             VertexFormat vertexFormat = config.getVertexFormat() != null ?
                     config.getVertexFormat() : DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP;
 
-            // SAFETY CHECK: Don't actually create the pipeline yet
-            // Just mark as "ready to initialize"
-            this.initialized = false; // Keep false for now
+            // Build VulkanMod Pipeline using the Builder class
+            Pipeline.Builder builder = new Pipeline.Builder(vertexFormat, name + "_custom");
 
-            LOGGER.info("Pipeline {} prepared (deferred initialization)", name);
+            // Set the compiled SPIR-V shaders
+            builder.setSPIRVs(vertexShader, fragmentShader);
 
-            // TODO: Actually create the pipeline when it's safe
-            // This requires hooking into VulkanMod's pipeline creation flow
+            // Copy UBOs and descriptors from template pipeline
+            // The builder will auto-discover from SPIR-V
+            builder.setUniforms(
+                    java.util.Collections.emptyList(),
+                    java.util.Collections.emptyList()
+            );
+
+            // Create the graphics pipeline
+            this.vulkanPipeline = builder.createGraphicsPipeline();
+            this.initialized = true;
+
+            LOGGER.info("✓ Custom pipeline '{}' initialized successfully", name);
 
         } catch (Exception e) {
-            LOGGER.error("Failed to prepare pipeline: {}", name, e);
-            throw new RuntimeException("Pipeline preparation failed: " + name, e);
+            LOGGER.error("✗ Failed to initialize custom pipeline: {}", name, e);
+            throw new RuntimeException("Pipeline initialization failed: " + name, e);
         }
     }
 

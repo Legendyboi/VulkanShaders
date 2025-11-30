@@ -4,8 +4,10 @@
   "package": "net.vulkanshaders.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "GraphicsPipelineMixin",
+    "GraphicsPipelineShaderMixin",
     "PipelineAccessor",
-    "GraphicsPipelineMixin"
+    "PipelineAccessorMethods"
   ],
   "injectors": {
     "defaultRequire": 1

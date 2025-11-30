@@ -1,5 +1,6 @@
 package net.vulkanshaders.pipeline;
 
+import net.vulkanmod.vulkan.shader.GraphicsPipeline;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,12 +32,18 @@ public class PipelineManager {
     }
 
     /**
-     * Initialize all registered pipelines (call after Vulkan context is ready)
+     * Initialize a specific pipeline using a VulkanMod pipeline as template
      */
-    public static void initializeAll() {
-        LOGGER.warn("Pipeline initialization is deferred - will be applied during rendering");
-        pipelinesInitialized = true;
-        LOGGER.info("Marked {} custom pipelines as ready", CUSTOM_PIPELINES.size());
+    public static void initializePipeline(String name, GraphicsPipeline template) {
+        CustomPipeline pipeline = CUSTOM_PIPELINES.get(name);
+        if (pipeline != null && !pipeline.isInitialized()) {
+            try {
+                pipeline.initializeFrom(template);
+                LOGGER.info("✓ Initialized custom pipeline: {}", name);
+            } catch (Exception e) {
+                LOGGER.error("✗ Failed to initialize pipeline: {}", name, e);
+            }
+        }
     }
 
     /**
@@ -56,12 +63,19 @@ public class PipelineManager {
 
     /**
      * Get the override pipeline for a VulkanMod pipeline
+     * Returns the custom pipeline ONLY if it's initialized
      */
-    public static Optional<CustomPipeline> getOverride(String vulkanModPipelineName) {
-        if (!overridesEnabled || !pipelinesInitialized) {
+    public static Optional<GraphicsPipeline> getOverridePipeline(String vulkanModPipelineName) {
+        if (!overridesEnabled) {
             return Optional.empty();
         }
-        return Optional.ofNullable(PIPELINE_OVERRIDES.get(vulkanModPipelineName));
+
+        CustomPipeline customPipeline = PIPELINE_OVERRIDES.get(vulkanModPipelineName);
+        if (customPipeline != null && customPipeline.isInitialized()) {
+            return Optional.of(customPipeline.getVulkanPipeline());
+        }
+
+        return Optional.empty();
     }
 
     /**
@@ -91,8 +105,13 @@ public class PipelineManager {
      * Get statistics
      */
     public static String getStats() {
-        return String.format("Registered %d custom pipelines (%d overrides)",
+        long initializedCount = CUSTOM_PIPELINES.values().stream()
+                .filter(CustomPipeline::isInitialized)
+                .count();
+
+        return String.format("Registered %d custom pipelines (%d initialized, %d overrides)",
                 CUSTOM_PIPELINES.size(),
+                initializedCount,
                 PIPELINE_OVERRIDES.size());
     }
 

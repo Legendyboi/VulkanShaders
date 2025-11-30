@@ -16,25 +16,31 @@ public class GraphicsPipelineMixin {
 
     /**
      * Inject at the end of the GraphicsPipeline constructor
+     * Initialize custom pipelines using this as a template
      */
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onGraphicsPipelineCreate(CallbackInfo ci) {
-        // Just log that VulkanMod's pipelines are being created
         if (!customPipelinesReady && PipelineManager.areOverridesEnabled()) {
             LOGGER.info("✓ VulkanMod GraphicsPipeline system is ready");
-            LOGGER.info("Custom pipelines loaded and ready (not yet applied)");
             customPipelinesReady = true;
         }
 
-        // Get the pipeline name using the accessor
+        // Get the pipeline name
         String pipelineName = ((PipelineAccessor) this).getName();
+        GraphicsPipeline thisPipeline = (GraphicsPipeline) (Object) this;
 
-        // Check if this pipeline has a custom override
-        PipelineManager.getOverride(pipelineName).ifPresent(customPipeline -> {
-            LOGGER.info("Pipeline '{}' has a custom shader available: {} from {}",
-                    pipelineName,
-                    customPipeline.getName(),
-                    customPipeline.getSourcePack().getName());
+        // Check if we have a custom pipeline for this name
+        PipelineManager.getPipeline(pipelineName).ifPresent(customPipeline -> {
+            if (!customPipeline.isInitialized()) {
+                LOGGER.info("Initializing custom pipeline '{}' from VulkanMod template", pipelineName);
+                PipelineManager.initializePipeline(pipelineName, thisPipeline);
+
+                if (customPipeline.isInitialized()) {
+                    LOGGER.info("✓ Custom shader '{}' from {} is now active!",
+                            pipelineName,
+                            customPipeline.getSourcePack().getName());
+                }
+            }
         });
     }
 }
