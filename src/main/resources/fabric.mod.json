@@ -14,9 +14,6 @@
   "icon": "assets/vulkanshaders/icon.png",
   "environment": "client",
   "entrypoints": {
-    "fabric-datagen": [
-      "net.vulkanshaders.client.VulkanShadersInitDataGenerator"
-    ],
     "client": [
       "net.vulkanshaders.client.VulkanShadersInitClient"
     ],
