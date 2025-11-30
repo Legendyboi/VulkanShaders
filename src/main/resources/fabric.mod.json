@@ -14,19 +14,12 @@
   "icon": "assets/vulkanshaders/icon.png",
   "environment": "client",
   "entrypoints": {
-    "client": [
-      "net.vulkanshaders.client.VulkanShadersInitClient"
-    ],
     "main": [
       "net.vulkanshaders.VulkanShadersInit"
     ]
   },
   "mixins": [
-    "vulkanshaders.mixins.json",
-    {
-      "config": "vulkanshaders.client.mixins.json",
-      "environment": "client"
-    }
+    "vulkanshaders.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.18.0",

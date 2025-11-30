@@ -11,19 +11,10 @@ base {
 }
 
 loom {
-    splitEnvironmentSourceSets()
-
     mods {
         "vulkanshaders" {
             sourceSet sourceSets.main
-            sourceSet sourceSets.client
         }
-    }
-}
-
-fabricApi {
-    configureDataGeneration {
-        client = true
     }
 }
 
@@ -41,10 +32,13 @@ dependencies {
     mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
+    // Fabric API
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
+    // VulkanMod dependency
     modImplementation files('libs/VulkanMod_1.21.10-0.5.7.jar')
 
+    // Include specific Fabric API modules
     ext.includeModule = { name ->
         var module = fabricApi.module(name, project.fabric_version)
         modImplementation(module)
@@ -99,7 +93,7 @@ java {
 }
 
 jar {
-    from("LICENSE") {
+    from("LICENSE.txt") {
         rename { "${it}_${project.archivesBaseName}" }
     }
 }
